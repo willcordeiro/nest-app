@@ -22,9 +22,110 @@ describe('App e2e', () => {
     );
     await app.init();
 
+    await app.listen(4444);
     prisma = app.get(PrismaService);
 
     await prisma.cleanDb();
+    pactum.request.setBaseUrl('http://localhost:4444');
   });
-  it.todo('should pass');
+
+  afterAll(() => {
+    app.close();
+  });
+
+  describe('Auth', () => {
+    describe('Signup', () => {
+      const dto: AuthDto = {
+        email: 'test@gmail.com',
+        password: '123',
+        firstName: 'test-firstname',
+        lastName: 'test-lastname',
+      };
+
+      it('should throw if email empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            password: dto.password,
+          })
+          .expectStatus(400);
+      });
+
+      it('should throw if password empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            password: dto.email,
+          })
+          .expectStatus(400);
+      });
+
+      it('should create an account', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody(dto)
+          .expectStatus(201);
+      });
+    });
+
+    describe('Signin', () => {
+      const dto: AuthDto = {
+        email: 'test@gmail.com',
+        password: '123',
+        firstName: '',
+        lastName: '',
+      };
+
+      it('should throw if email empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({
+            password: dto.password,
+          })
+          .expectStatus(400);
+      });
+
+      it('should throw if password empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({
+            password: dto.email,
+          })
+          .expectStatus(400);
+      });
+
+      it('should login an account', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody(dto)
+          .expectStatus(200);
+
+        //.inspect(); to inspect the return
+      });
+    });
+  });
+
+  describe('User', () => {
+    describe('Get me', () => {});
+
+    describe('Edit user', () => {});
+  });
+
+  describe('Bookmarks', () => {
+    describe('Create bookmark', () => {});
+
+    describe('Get bookmark', () => {});
+
+    describe('Get bookmark by id', () => {});
+
+    describe('Edit bookmark', () => {});
+
+    describe('Delete bookmark', () => {});
+  });
 });
